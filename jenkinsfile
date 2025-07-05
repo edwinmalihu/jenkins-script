@@ -35,7 +35,7 @@ pipeline{
                         sh """
                             cd $appname
                             ls
-                            docker login -u ${username} -p ${password} $urlregistry
+                            podman login -u ${username} -p ${password} $urlregistry
 
 
                         """
