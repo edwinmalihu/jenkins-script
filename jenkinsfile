@@ -11,6 +11,7 @@ pipeline{
         appsurl = "github.com/edwinmalihu/customer-service-fly.git"
         appname = "customer-service-fly"
         urlregistry = "https://registry-1.docker.io"
+        myrepo = "edwinmalihu"
 
     }
 
@@ -36,8 +37,9 @@ pipeline{
                             cd $appname
                             ls
                             podman login -u ${username} -p ${password} $urlregistry
-
-
+                            podman build -t $appname -f dockerfile .
+                            podman tag $appname docker.io/$myrepo/$appname-test:0.0.1
+                            podman push docker.io/docker.io/$myrepo/$appname-test:0.0.1
                         """
                     }
                 }

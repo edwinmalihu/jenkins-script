@@ -12,6 +12,9 @@ RUN apk add --no-cache \
 
 # --- PENYIAPAN USER DAN HOME DIREKTORI (KUNCI UTAMA) ---
 
+RUN mkdir -p /run/podman /var/lib/containers/storage && \
+    printf '[storage]\ndriver = "vfs"\nrunroot = "/run/podman"\ngraphroot = "/var/lib/containers/storage"\n' > /etc/containers/storage.conf
+
 # 1. Buat user dan grup generik di dalam image.
 #    Kita beri nama 'appuser' dengan home direktori di /home/appuser
 #    UID/GID tidak terlalu penting karena akan ditimpa oleh Jenkins,
