@@ -1,0 +1,37 @@
+pipeline{
+    agent{
+        docker { 
+            image 'my-light-dev-tools-all' 
+            args '--privileged'
+        }
+        
+    }
+
+    stages{
+        stage("Clone Source"){
+            steps{
+                script{
+                    cleanWs()
+                    sh "git --version"
+                }
+            }
+        }
+
+        stage("Build & Push Image"){
+            steps{
+                script{
+                    echo "Build Image"
+                }
+            }
+        }
+
+        stage("Deploy To Fly.io"){
+            steps{
+                script{
+                    sh "fly version"
+                    echo "Deploy Service"
+                }
+            }
+        }
+    }
+}
