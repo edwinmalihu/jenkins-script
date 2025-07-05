@@ -9,6 +9,7 @@ pipeline{
 
     environment{
         appsurl = "github.com/edwinmalihu/customer-service-fly.git"
+        repoconfig = "github.com/edwinmalihu/fly-config.git"
         appname = "customer-service-fly"
         urlregistry = "https://registry-1.docker.io"
         myrepo = "edwinmalihu"
@@ -21,9 +22,12 @@ pipeline{
                 script{
                     cleanWs()
                     withCredentials([string(credentialsId: 'token-github', variable: 'GITHUB_TOKEN')]) {
+                        // get sercvice
                         sh """
-                            git clone --branch main https://oauth2:${GITHUB_TOKEN}@$appsurl $appname
+                            git clone --branch main https://oauth2:${GITHUB_TOKEN}@$appsurl $appname 
+                            git clone --branch main https://oauth2:${GITHUB_TOKEN}@$repoconfig 
                         """
+                        
                     }  
                 }
             }
@@ -46,11 +50,31 @@ pipeline{
             }
         }
 
+        stage("Init To Fly.io"){
+            steps{
+                script{
+                    withCredentials([usernamePassword(credentialsId: 'fly-auth', passwordVariable: 'password', usernameVariable: 'username')]) {
+                        sh """
+                            fly auth login --email ${username} --password ${password}
+                            fly apps create ${appName}-test --org personal
+                            cat ${WORKSPACE}/fly-config/backend-service.toml | sed 's/{APPNAME}/$appname-test/g' > ${WORKSPACE}/$appname/fly.toml
+                        """
+                    }
+                }
+            }
+        }
+
         stage("Deploy To Fly.io"){
             steps{
                 script{
-                    sh "fly version"
-                    echo "Deploy Service"
+                    withCredentials([usernamePassword(credentialsId: 'fly-auth', passwordVariable: 'password', usernameVariable: 'username')]) {
+                        sh """
+                            cd $appname
+                            fly auth login --email ${username} --password ${password}
+                            sed -i 's|{IMAGE}|$myrepo/$appname-test:0.0.1|g' fly.toml
+                            fly deploy --config fly.toml
+                        """
+                    }
                 }
             }
         }
