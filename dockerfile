@@ -8,7 +8,9 @@ RUN apk add --no-cache \
     podman \
     curl \
     unzip \
-    shadow
+    shadow \
+    bash \
+    iptables
 
 # --- PENYIAPAN USER DAN HOME DIREKTORI (KUNCI UTAMA) ---
 
