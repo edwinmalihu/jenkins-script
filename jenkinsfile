@@ -2,7 +2,7 @@ pipeline{
     agent{
         docker { 
             image 'my-light-dev-tools-all' 
-            args '--privileged'
+            args '--privileged --user 0'
         }
         
     }
