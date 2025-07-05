@@ -9,6 +9,9 @@ pipeline{
 
     environment{
         appsurl = "github.com/edwinmalihu/customer-service-fly.git"
+        appname = "customer-service-fly"
+        urlregistry = "https://registry-1.docker.io"
+
     }
 
     stages{
@@ -18,7 +21,7 @@ pipeline{
                     cleanWs()
                     withCredentials([string(credentialsId: 'token-github', variable: 'GITHUB_TOKEN')]) {
                         sh """
-                            git clone --branch main https://oauth2:${GITHUB_TOKEN}@$appsurl 
+                            git clone --branch main https://oauth2:${GITHUB_TOKEN}@$appsurl $appname
                         """
                     }  
                 }
@@ -28,7 +31,15 @@ pipeline{
         stage("Build & Push Image"){
             steps{
                 script{
-                    echo "Build Image"
+                    withCredentials([usernamePassword(credentialsId: 'docker-hub-cred', passwordVariable: 'password', usernameVariable: 'username')]) {
+                        sh """
+                            cd $appname
+                            ls
+                            docker login -u ${username} -p ${password} $urlregistry
+
+
+                        """
+                    }
                 }
             }
         }
