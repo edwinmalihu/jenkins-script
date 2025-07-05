@@ -41,7 +41,7 @@ pipeline{
                             cd $appname
                             ls
                             podman login -u ${username} -p ${password} $urlregistry
-                            podman build -t $appname -f dockerfile .
+                            podman build --platform=linux/amd64 -t $appname -f dockerfile .
                             podman tag $appname docker.io/$myrepo/$appname-test:0.0.1
                             podman push docker.io/$myrepo/$appname-test:0.0.1
                         """
