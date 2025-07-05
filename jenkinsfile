@@ -54,11 +54,18 @@ pipeline{
             steps{
                 script{
                     withCredentials([usernamePassword(credentialsId: 'fly-auth', passwordVariable: 'password', usernameVariable: 'username')]) {
-                        sh """
-                            fly auth login --email ${username} --password ${password}
-                            fly apps create ${appName}-test --org personal
-                            cat ${WORKSPACE}/fly-config/backend-service.toml | sed 's/{APPNAME}/$appname-test/g' > ${WORKSPACE}/$appname/fly.toml
-                        """
+                        try{
+                            sh """
+                                fly auth login --email ${username} --password ${password}
+                                fly apps create ${appName}-test --org personal
+                            """
+                        }catch (err) {
+                            echo "$err"
+                        }
+                        
+
+
+                        sh "cat ${WORKSPACE}/fly-config/backend-service.toml | sed 's/{APPNAME}/$appname-test/g' > ${WORKSPACE}/$appname/fly.toml"
                     }
                 }
             }
