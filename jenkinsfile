@@ -13,7 +13,7 @@ pipeline{
         appname = "customer-service-fly"
         urlregistry = "https://registry-1.docker.io"
         myrepo = "edwinmalihu"
-        myImage = "edwinmalihu//customer-service-fly:latest"
+        myImage = "edwinmalihu/customer-service-fly:latest"
 
     }
 
