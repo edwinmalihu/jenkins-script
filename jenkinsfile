@@ -7,12 +7,20 @@ pipeline{
         
     }
 
+    environment{
+        appsurl = "github.com/edwinmalihu/customer-service-fly.git"
+    }
+
     stages{
         stage("Clone Source"){
             steps{
                 script{
                     cleanWs()
-                    sh "git --version"
+                    withCredentials([string(credentialsId: 'token-github', variable: 'GITHUB_TOKEN')]) {
+                        sh """
+                            git clone --branch main https://oauth2:${GITHUB_TOKEN}@$appsurl 
+                        """
+                    }  
                 }
             }
         }
