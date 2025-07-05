@@ -13,6 +13,7 @@ pipeline{
         appname = "customer-service-fly"
         urlregistry = "https://registry-1.docker.io"
         myrepo = "edwinmalihu"
+        myImage = "edwinmalihu//customer-service-fly:latest"
 
     }
 
@@ -40,10 +41,10 @@ pipeline{
                         sh """
                             cd $appname
                             ls
-                            podman login -u ${username} -p ${password} $urlregistry
-                            podman build --platform=linux/amd64 -t $appname -f dockerfile .
-                            podman tag $appname docker.io/$myrepo/$appname-test:0.0.1
-                            podman push docker.io/$myrepo/$appname-test:0.0.1
+                            #podman login -u ${username} -p ${password} $urlregistry
+                            #podman build --platform=linux/amd64 -t $appname -f dockerfile .
+                            #podman tag $appname docker.io/$myrepo/$appname-test:0.0.1
+                            #podman push docker.io/$myrepo/$appname-test:0.0.1
                         """
                     }
                 }
@@ -78,7 +79,7 @@ pipeline{
                         sh """
                             cd $appname
                             fly auth login --email ${username} --password ${password}
-                            sed -i 's|{IMAGE}|$myrepo/$appname-test:0.0.1|g' fly.toml
+                            sed -i 's|{IMAGE}|$myImage|g' fly.toml
                             fly deploy --config fly.toml
                         """
                     }
