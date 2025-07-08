@@ -14,6 +14,8 @@ on:
     secrets:
       FLY_API_TOKEN:
         required: true
+      PAT_TOKEN:
+        required: false
 
 jobs:
   deploy:
