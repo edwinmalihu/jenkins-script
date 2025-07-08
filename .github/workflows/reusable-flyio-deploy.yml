@@ -1,0 +1,28 @@
+name: Reusable Fly.io Deployment
+on:
+  workflow_call:
+    inputs:
+      app-name:
+        description: "The name of the Fly.io app"
+        required: true
+        type: string
+    secrets:
+      FLY_API_TOKEN:
+        required: true
+
+jobs:
+  deploy:
+    name: Deploy ${{ inputs.app-name }} to Fly.io
+    runs-on: ubuntu-latest
+    env:
+      FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Flyctl
+        uses: superfly/flyctl-action@master
+
+      # Menggunakan input untuk menargetkan aplikasi yang benar
+      - name: Deploy to Fly.io
+        run: flyctl deploy --remote-only --app ${{ inputs.app-name }}
