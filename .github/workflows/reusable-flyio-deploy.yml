@@ -6,6 +6,11 @@ on:
         description: "The name of the Fly.io app"
         required: true
         type: string
+      # --- BARU: Input untuk nama file konfigurasi ---
+      config-file:
+        description: "The name of the .toml configuration file in the config repo"
+        required: true
+        type: string
     secrets:
       FLY_API_TOKEN:
         required: true
@@ -14,15 +19,28 @@ jobs:
   deploy:
     name: Deploy ${{ inputs.app-name }} to Fly.io
     runs-on: ubuntu-latest
-    env:
-      FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
     steps:
-      - name: Checkout repository
+      - name: Checkout service code
         uses: actions/checkout@v4
+
+      - name: Checkout fly config repository
+        uses: actions/checkout@v4
+        with:
+          repository: "edwinmalihu/fly-config"
+          path: "./fly-config"
+
+      # --- DIUBAH: Gunakan input 'config-file' untuk path yang dinamis ---
+      - name: Prepare fly.toml configuration
+        run: |
+          CONFIG_PATH="./fly-config/${{ inputs.config-file }}"
+          echo "Preparing configuration file at ${CONFIG_PATH}"
+          sed -i "s/{APPNAME}/${{ inputs.app-name }}/g" "${CONFIG_PATH}"
 
       - name: Setup Flyctl
         uses: superfly/flyctl-action@master
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
 
-      # Menggunakan input untuk menargetkan aplikasi yang benar
+      # --- DIUBAH: Gunakan path dinamis yang sama untuk deploy ---
       - name: Deploy to Fly.io
-        run: flyctl deploy --remote-only --app ${{ inputs.app-name }}
+        run: flyctl deploy -c ./fly-config/${{ inputs.config-file }} --remote-only
