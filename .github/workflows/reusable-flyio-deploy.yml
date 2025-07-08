@@ -30,6 +30,7 @@ jobs:
         with:
           repository: "edwinmalihu/fly-config"
           path: "./fly-config"
+          token: ${{ secrets.PAT_TOKEN }}
 
       # --- DIUBAH: Gunakan input 'config-file' untuk path yang dinamis ---
       - name: Prepare fly.toml configuration
