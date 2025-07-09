@@ -45,7 +45,7 @@ jobs:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
 
       - name: Deploy to Fly.io
-        uses: superfly/flyctl-action@v1
+        uses: superfly/flyctl-action@main
         with:
           args: "deploy -c ./fly-config/${{ inputs.config-file }} --remote-only"
         env:
