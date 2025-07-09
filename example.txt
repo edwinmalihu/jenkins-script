@@ -1,0 +1,2 @@
+api-gateway-fly:v1.0.0
+customer-service-fly:v1.0.0

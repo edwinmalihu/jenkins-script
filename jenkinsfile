@@ -8,7 +8,7 @@ pipeline{
     agent any
 
     environment{
-        urlGit = "github.com/edwinmalihu/"
+        urlGit = "github.com/edwinmalihu"
         repoconfig = "github.com/edwinmalihu/fly-config.git"
         serviceName = ""
         urlregistry = "https://registry-1.docker.io"
@@ -47,7 +47,7 @@ pipeline{
                             serviceTag = sourceService.split(':')[1].toString()
                         
                             sh """
-                                git clone --branch $serviceTag https://oauth2:${GITHUB_TOKEN}@$appsurl $serviceName-$serviceTag 
+                                git clone --branch $serviceTag https://oauth2:${GITHUB_TOKEN}@$urlGit/${serviceName}.git $serviceName-$serviceTag 
                             """
 
                         }
