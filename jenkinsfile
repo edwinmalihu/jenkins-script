@@ -61,20 +61,21 @@ pipeline{
         stage("Build & Push Image"){
             steps{
                 script{
-                    withCredentials([usernamePassword(credentialsId: 'docker-hub-cred', passwordVariable: 'password', usernameVariable: 'username')]) {
-                        serviceList.each { sourceService ->
-                            serviceName = sourceService.split(':')[0].toString()
-                            serviceTag = sourceService.split(':')[1].toString()
+                    // withCredentials([usernamePassword(credentialsId: 'docker-hub-cred', passwordVariable: 'password', usernameVariable: 'username')]) {
+                    //     serviceList.each { sourceService ->
+                    //         serviceName = sourceService.split(':')[0].toString()
+                    //         serviceTag = sourceService.split(':')[1].toString()
 
-                            sh """
-                                cd ${serviceName}_${serviceTag}
-                                podman login -u ${username} -p ${password} $urlregistry
-                                podman build --platform=linux/amd64 -t $serviceName -f dockerfile .
-                                podman tag $serviceName docker.io/$myrepo/$serviceName-jenkins:$serviceTag
-                                podman push docker.io/$myrepo/$serviceName-jenkins:$serviceTag
-                            """
-                        }
-                    }
+                    //         sh """
+                    //             cd ${serviceName}_${serviceTag}
+                    //             podman login -u ${username} -p ${password} $urlregistry
+                    //             podman build --platform=linux/amd64 -t $serviceName -f dockerfile .
+                    //             podman tag $serviceName docker.io/$myrepo/$serviceName-jenkins:$serviceTag
+                    //             podman push docker.io/$myrepo/$serviceName-jenkins:$serviceTag
+                    //         """
+                    //     }
+                    // }
+                    echo "SKIP"
                 }
             }
         }
@@ -82,27 +83,29 @@ pipeline{
         stage("Init To Fly.io"){
             steps{
                 script{
-                    withCredentials([usernamePassword(credentialsId: 'fly-auth', passwordVariable: 'password', usernameVariable: 'username')]) {
-                        try{
-                            sh """
-                                fly auth login --email ${username} --password ${password}
+                    // withCredentials([usernamePassword(credentialsId: 'fly-auth', passwordVariable: 'password', usernameVariable: 'username')]) {
+                    //     try{
+                    //         sh """
+                    //             fly auth login --email ${username} --password ${password}
                                 
-                            """
-                            serviceList.each { sourceService ->
-                                serviceName = sourceService.split(':')[0].toString()
-                                serviceTag = sourceService.split(':')[1].toString()
+                    //         """
+                    //         serviceList.each { sourceService ->
+                    //             serviceName = sourceService.split(':')[0].toString()
+                    //             serviceTag = sourceService.split(':')[1].toString()
 
-                                sh """
-                                    fly apps create ${serviceName}-jenkins --org personal
-                                """
-                            }
+                    //             sh """
+                    //                 fly apps create ${serviceName}-jenkins --org personal
+                    //             """
+                    //         }
 
 
-                        }catch (err) {
-                            echo "$err"
-                        }
+                    //     }catch (err) {
+                    //         echo "$err"
+                    //     }
                         
-                    }
+                    // }
+
+                    echo "SKIP"
                 }
             }
         }
@@ -118,19 +121,21 @@ pipeline{
 
                             if(serviceName == "api-gateway-fly"){
                                 sh """
+                                    ls 
                                     sh "cat ${WORKSPACE}/fly-config/jenkins/api-gateway.toml | sed 's/{APPNAME}/$serviceName-jenkins/g' > ${WORKSPACE}/${serviceName}_${serviceTag}/fly.toml"
                                 """
                             }
 
                             sh """
-                                sh "cat ${WORKSPACE}/fly-config/jenkins/backend-service.toml | sed 's/{APPNAME}/$serviceName-jenkins/g' > ${WORKSPACE}/${serviceName_}${serviceTag}/fly.toml"
+                                ls
+                                sh "cat ${WORKSPACE}/fly-config/jenkins/backend-service.toml | sed 's/{APPNAME}/$serviceName-jenkins/g' > ${WORKSPACE}/${serviceName}_${serviceTag}/fly.toml"
                             """
 
-                            sh """
-                                cd ${serviceName}_${serviceTag}
-                                sed -i 's|{IMAGE}|docker.io/$myrepo/$serviceName-jenkins:$serviceTag|g' fly.toml
-                                fly deploy --config fly.toml
-                            """
+                            // sh """
+                            //     cd ${serviceName}_${serviceTag}
+                            //     sed -i 's|{IMAGE}|docker.io/$myrepo/$serviceName-jenkins:$serviceTag|g' fly.toml
+                            //     fly deploy --config fly.toml
+                            // """
                         }
 
                         
