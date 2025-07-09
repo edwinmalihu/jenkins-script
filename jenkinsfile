@@ -48,7 +48,7 @@ pipeline{
                             serviceTag = sourceService.split(':')[1].toString()
                         
                             sh """
-                                git clone --branch $serviceTag https://oauth2:${GITHUB_TOKEN}@$urlGit/${serviceName}.git $serviceName-$serviceTag 
+                                git clone --branch $serviceTag https://oauth2:${GITHUB_TOKEN}@$urlGit/${serviceName}.git ${serviceName}_${serviceTag}
                             """
 
                         }
@@ -67,7 +67,7 @@ pipeline{
                             serviceTag = sourceService.split(':')[1].toString()
 
                             sh """
-                                cd $serviceName-$serviceTag
+                                cd ${serviceName}_${serviceTag}
                                 podman login -u ${username} -p ${password} $urlregistry
                                 podman build --platform=linux/amd64 -t $serviceName -f dockerfile .
                                 podman tag $serviceName docker.io/$myrepo/$serviceName-jenkins:$serviceTag
@@ -118,16 +118,16 @@ pipeline{
 
                             if(serviceName == "api-gateway-fly"){
                                 sh """
-                                    sh "cat ${WORKSPACE}/fly-config/jenkins/api-gateway.toml | sed 's/{APPNAME}/$serviceName-jenkins/g' > ${WORKSPACE}/$serviceName-$serviceTag/fly.toml"
+                                    sh "cat ${WORKSPACE}/fly-config/jenkins/api-gateway.toml | sed 's/{APPNAME}/$serviceName-jenkins/g' > ${WORKSPACE}/${serviceName}_${serviceTag}/fly.toml"
                                 """
                             }
 
                             sh """
-                                sh "cat ${WORKSPACE}/fly-config/jenkins/backend-service.toml | sed 's/{APPNAME}/$serviceName-jenkins/g' > ${WORKSPACE}/$serviceName-$serviceTag/fly.toml"
+                                sh "cat ${WORKSPACE}/fly-config/jenkins/backend-service.toml | sed 's/{APPNAME}/$serviceName-jenkins/g' > ${WORKSPACE}/${serviceName_}${serviceTag}/fly.toml"
                             """
 
                             sh """
-                                cd $serviceName-$serviceTag
+                                cd ${serviceName}_${serviceTag}
                                 sed -i 's|{IMAGE}|docker.io/$myrepo/$serviceName-jenkins:$serviceTag|g' fly.toml
                                 fly deploy --config fly.toml
                             """
