@@ -122,13 +122,14 @@ pipeline{
                             if(serviceName == "api-gateway-fly"){
                                 sh """
                                     cd ${serviceName}_${serviceTag}
-                                    sh "cp  ${WORKSPACE}/fly-config/jenkins/api-gateway.toml fly.toml"
+            
+                                    cp  ${WORKSPACE}/fly-config/jenkins/api-gateway.toml fly.toml
                                 """
                             }
 
                             sh """
                                 cd ${serviceName}_${serviceTag}
-                                sh "cp ${WORKSPACE}/fly-config/jenkins/backend-service.toml fly.toml"
+                                cp ${WORKSPACE}/fly-config/jenkins/backend-service.toml fly.toml
                             """
 
                             sh """
