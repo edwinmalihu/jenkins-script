@@ -8,26 +8,51 @@ pipeline{
     }
 
     environment{
-        appsurl = "github.com/edwinmalihu/customer-service-fly.git"
+        urlGit = "github.com/edwinmalihu/"
+        appname = ""
         repoconfig = "github.com/edwinmalihu/fly-config.git"
-        appname = "customer-service-fly"
+        serviceName = "customer-service-fly"
         urlregistry = "https://registry-1.docker.io"
         myrepo = "edwinmalihu"
         myImage = "edwinmalihu/customer-service-fly:latest"
+        serviceList = ""
+        serviceTag = ""
+
 
     }
 
     stages{
-        stage("Clone Source"){
+        stage("Setup Parameter"){
             steps{
                 script{
                     cleanWs()
+                    withFileParameter('datafile') {
+                        sh "mv $datafile list-service.txt"
+                        def content
+                        content = sh(returnStdout: true, script: "cat list-service.txt")
+                        serviceList = content.readLines()
+
+                        
+                    }
+                }
+            }
+        }
+        stage("Clone Source"){
+            steps{
+                script{
                     withCredentials([string(credentialsId: 'token-github', variable: 'GITHUB_TOKEN')]) {
                         // get sercvice
-                        sh """
-                            git clone --branch main https://oauth2:${GITHUB_TOKEN}@$appsurl $appname 
-                            git clone --branch main https://oauth2:${GITHUB_TOKEN}@$repoconfig 
-                        """
+                        sh "git clone --branch main https://oauth2:${GITHUB_TOKEN}@$repoconfig"
+
+                        serviceList.each { sourceService ->
+                            serviceName = sourceService.split(':')[0].toString()
+                            serviceTag = sourceService.split(':')[1].toString()
+                        
+                            sh """
+                                git clone --branch $serviceTag https://oauth2:${GITHUB_TOKEN}@$appsurl $serviceName-$serviceTag 
+                            """
+
+                        }
                         
                     }  
                 }
@@ -38,14 +63,18 @@ pipeline{
             steps{
                 script{
                     withCredentials([usernamePassword(credentialsId: 'docker-hub-cred', passwordVariable: 'password', usernameVariable: 'username')]) {
-                        sh """
-                            cd $appname
-                            ls
-                            #podman login -u ${username} -p ${password} $urlregistry
-                            #podman build --platform=linux/amd64 -t $appname -f dockerfile .
-                            #podman tag $appname docker.io/$myrepo/$appname-test:0.0.1
-                            #podman push docker.io/$myrepo/$appname-test:0.0.1
-                        """
+                        serviceList.each { sourceService ->
+                            serviceName = sourceService.split(':')[0].toString()
+                            serviceTag = sourceService.split(':')[1].toString()
+
+                            sh """
+                                cd $serviceName-$serviceTag
+                                docker login -u ${username} -p ${password} $urlregistry
+                                docker build --platform=linux/amd64 -t $serviceName -f dockerfile .
+                                docker tag $serviceName docker.io/$myrepo/$serviceName-jenkins:$serviceTag
+                                docker push docker.io/$myrepo/$serviceName-jenkins:$serviceTag
+                            """
+                        }
                     }
                 }
             }
@@ -58,15 +87,22 @@ pipeline{
                         try{
                             sh """
                                 fly auth login --email ${username} --password ${password}
-                                fly apps create ${appName}-test --org personal
+                                
                             """
+                            serviceList.each { sourceService ->
+                                serviceName = sourceService.split(':')[0].toString()
+                                serviceTag = sourceService.split(':')[1].toString()
+
+                                sh """
+                                    fly apps create ${appName}-jenkins --org personal
+                                """
+                            }
+
+
                         }catch (err) {
                             echo "$err"
                         }
                         
-
-
-                        sh "cat ${WORKSPACE}/fly-config/backend-service.toml | sed 's/{APPNAME}/$appname-test/g' > ${WORKSPACE}/$appname/fly.toml"
                     }
                 }
             }
@@ -76,12 +112,29 @@ pipeline{
             steps{
                 script{
                     withCredentials([usernamePassword(credentialsId: 'fly-auth', passwordVariable: 'password', usernameVariable: 'username')]) {
-                        sh """
-                            cd $appname
-                            fly auth login --email ${username} --password ${password}
-                            sed -i 's|{IMAGE}|$myImage|g' fly.toml
-                            fly deploy --config fly.toml
-                        """
+                        sh "fly auth login --email ${username} --password ${password}"
+                        serviceList.each { sourceService ->
+                            serviceName = sourceService.split(':')[0].toString()
+                            serviceTag = sourceService.split(':')[1].toString()
+
+                            if(serviceName == "api-gateway-fly"){
+                                sh """
+                                    sh "cat ${WORKSPACE}/fly-config/jenkins/api-gateway.toml | sed 's/{APPNAME}/$serviceName-jenkins/g' > ${WORKSPACE}/$serviceName-$serviceTag/fly.toml"
+                                """
+                            }
+
+                            sh """
+                                sh "cat ${WORKSPACE}/fly-config/jenkins/backend-service.toml | sed 's/{APPNAME}/$serviceName-jenkins/g' > ${WORKSPACE}/$serviceName-$serviceTag/fly.toml"
+                            """
+
+                            sh """
+                                cd $serviceName-$serviceTag
+                                sed -i 's|{IMAGE}|docker.io/$myrepo/$serviceName-jenkins:$serviceTag|g' fly.toml
+                                fly deploy --config fly.toml
+                            """
+                        }
+
+                        
                     }
                 }
             }
