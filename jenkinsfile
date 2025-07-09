@@ -121,14 +121,14 @@ pipeline{
 
                             if(serviceName == "api-gateway-fly"){
                                 sh """
-                                    ls 
-                                    sh "cat ${WORKSPACE}/fly-config/jenkins/api-gateway.toml | sed 's/{APPNAME}/$serviceName-jenkins/g' > ${WORKSPACE}/${serviceName}_${serviceTag}/fly.toml"
+                                    cd ${serviceName}_${serviceTag}
+                                    sh "cat ${WORKSPACE}/fly-config/jenkins/api-gateway.toml | sed 's/{APPNAME}/$serviceName-jenkins/g' > fly.toml"
                                 """
                             }
 
                             sh """
-                                ls
-                                sh "cat ${WORKSPACE}/fly-config/jenkins/backend-service.toml | sed 's/{APPNAME}/$serviceName-jenkins/g' > ${WORKSPACE}/${serviceName}_${serviceTag}/fly.toml"
+                                cd ${serviceName}_${serviceTag}
+                                sh "cat ${WORKSPACE}/fly-config/jenkins/backend-service.toml | sed 's/{APPNAME}/$serviceName-jenkins/g' > fly.toml"
                             """
 
                             // sh """
