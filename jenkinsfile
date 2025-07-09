@@ -135,8 +135,8 @@ pipeline{
                             sh """
                                 cd ${serviceName}_${serviceTag}
                                 ls
-                                sed -i 's|{IMAGE}|docker.io/$myrepo/$serviceName-jenkins:$serviceTag|g' fly.toml
-                                sed -i 's|{APPNAME}|$serviceName-jenkins|g' fly.toml
+                                sed -i '' 's|{IMAGE}|docker.io/$myrepo/$serviceName-jenkins:$serviceTag|g' fly.toml
+                                sed -i '' 's|{APPNAME}|$serviceName-jenkins|g' fly.toml
                                 #fly deploy --config fly.toml
                             """
                         }
