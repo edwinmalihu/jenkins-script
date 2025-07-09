@@ -38,14 +38,14 @@ jobs:
           sed -i "s/{APPNAME}/${{ inputs.app-name }}/g" "${CONFIG_PATH}"
 
       - name: Setup Flyctl
-        uses: superfly/flyctl-action@v1
+        uses: fly-apps/flyctl-actions@v1
         with:
           args: "version"
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
 
       - name: Deploy to Fly.io
-        uses: superfly/flyctl-action@main
+        uses: fly-apps/flyctl-actions@v1
         with:
           args: "deploy -c ./fly-config/${{ inputs.config-file }} --remote-only"
         env:
