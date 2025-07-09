@@ -1,2 +1,2 @@
-api-gateway-fly:v1.0.0
+api-gateway-fly:v1.1.0
 customer-service-fly:v1.0.0

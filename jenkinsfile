@@ -41,6 +41,7 @@ pipeline{
                     withCredentials([string(credentialsId: 'token-github', variable: 'GITHUB_TOKEN')]) {
                         // get sercvice
                         sh "git clone --branch main https://oauth2:${GITHUB_TOKEN}@$repoconfig"
+                        sh "cat ${WORKSPACE}/fly-config/jenkins/api-gateway.toml"
 
                         serviceList.each { sourceService ->
                             serviceName = sourceService.split(':')[0].toString()
