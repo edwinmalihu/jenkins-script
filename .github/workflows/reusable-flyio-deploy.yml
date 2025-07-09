@@ -29,7 +29,6 @@ jobs:
         with:
           repository: edwinmalihu/fly-config
           path: ./fly-config
-          token: ${{ secrets.PAT_TOKEN }}
 
       - name: Prepare fly.toml configuration
         run: |
