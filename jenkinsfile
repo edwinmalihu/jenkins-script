@@ -68,10 +68,10 @@ pipeline{
 
                             sh """
                                 cd $serviceName-$serviceTag
-                                docker login -u ${username} -p ${password} $urlregistry
-                                docker build --platform=linux/amd64 -t $serviceName -f dockerfile .
-                                docker tag $serviceName docker.io/$myrepo/$serviceName-jenkins:$serviceTag
-                                docker push docker.io/$myrepo/$serviceName-jenkins:$serviceTag
+                                podman login -u ${username} -p ${password} $urlregistry
+                                podman build --platform=linux/amd64 -t $serviceName -f dockerfile .
+                                podman tag $serviceName docker.io/$myrepo/$serviceName-jenkins:$serviceTag
+                                podman push docker.io/$myrepo/$serviceName-jenkins:$serviceTag
                             """
                         }
                     }
