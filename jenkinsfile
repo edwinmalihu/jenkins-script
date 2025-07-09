@@ -9,12 +9,10 @@ pipeline{
 
     environment{
         urlGit = "github.com/edwinmalihu/"
-        appname = ""
         repoconfig = "github.com/edwinmalihu/fly-config.git"
-        serviceName = "customer-service-fly"
+        serviceName = ""
         urlregistry = "https://registry-1.docker.io"
         myrepo = "edwinmalihu"
-        myImage = "edwinmalihu/customer-service-fly:latest"
         serviceList = ""
         serviceTag = ""
 
@@ -94,7 +92,7 @@ pipeline{
                                 serviceTag = sourceService.split(':')[1].toString()
 
                                 sh """
-                                    fly apps create ${appName}-jenkins --org personal
+                                    fly apps create ${serviceName}-jenkins --org personal
                                 """
                             }
 
