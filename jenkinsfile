@@ -1,11 +1,11 @@
 pipeline{
-    agent{
-        docker { 
-            image 'my-light-dev-tools-all' 
-            args '--privileged --user 0'
-        }
-        
-    }
+    // agent{
+    //     docker { 
+    //         image 'my-light-dev-tools-all' 
+    //         args '--privileged --user 0'
+    //     }
+    // }
+    agent any
 
     environment{
         urlGit = "github.com/edwinmalihu/"
